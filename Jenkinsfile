@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     IMAGE = "url-shortener:dev"
+    CLUSTER = "devops-lab"
     NAMESPACE = "url-shortener"
   }
 
@@ -22,14 +23,24 @@ pipeline {
 
     stage('Load image into kind') {
       steps {
-        sh 'kind load docker-image $IMAGE --name devops-lab'
+        sh 'kind load docker-image $IMAGE --name $CLUSTER'
       }
     }
 
-    stage('Deploy with Helm') {
+    stage('Deploy via Helm') {
       steps {
         sh 'helm upgrade --install url-shortener ./deploy/helm/url-shortener -n $NAMESPACE'
       }
+    }
+
+  }
+
+  post {
+    success {
+      echo "Deployment successful 🚀"
+    }
+    failure {
+      echo "Pipeline failed ❌"
     }
   }
 }
